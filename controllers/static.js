@@ -1,6 +1,7 @@
 const axios = require("axios");
 const PdfPrinter = require("pdfmake");
 const nodemailer = require("nodemailer");
+const { DateTime } = require("luxon");
 const fs = require("fs");
 const path = require("path");
 const FormData = require("form-data");
@@ -93,7 +94,14 @@ const trackParcel = async (pk_id, returnContent) => {
 const parseParcelResponse = (data, returnContent) => {
   try {
     if (returnContent === "sendTime") {
-      return data.data[0].tklist[0].time;
+      const time = data.data[0].tklist[0].time;
+      const timeInISO = [time.slice(0, 10), "T", time.slice(10).trim()].join(
+        ""
+      );
+      const timeInISOInADL = DateTime.fromISO(timeInISO, {
+        zone: "Australia/Adelaide",
+      }).toString();
+      return timeInISOInADL;
     } else if (returnContent === "sendTimeAndTrack") {
       const trackInfo = data.data[0].tklist.map((item) => ({
         time: item.time,
@@ -108,6 +116,15 @@ const parseParcelResponse = (data, returnContent) => {
     throw error;
   }
 };
+
+const test = async () => {
+  const result = await trackParcel("PE6584574AD", "sendTime");
+  console.log(result);
+
+  const china = DateTime.fromISO(result).setZone("asia/shanghai").toString();
+  console.log(china);
+};
+//test()
 
 const updateNote = async (req, res) => {
   const { newNote, type, _id } = req.body;
@@ -476,9 +493,9 @@ const generateInvoicePdf = (record) => {
     };
 
     const generateOverviewTableBody = (record) => [
-      ["Time", "Transaction ID", "User", "Qty", "Subtotal", "Payment method"],
+      ["Time (CST)", "Transaction ID", "User", "Qty", "Subtotal", "Payment method"],
       [
-        new Date().toLocaleString(),
+        DateTime.now().setZone("asia/shanghai").toFormat("yyyy-MM-dd HH:mm:ss"),
         record._id.toString(),
         record.username,
         record.qty,

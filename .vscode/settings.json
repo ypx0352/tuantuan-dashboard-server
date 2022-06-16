@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/656b9b3b-0b68-44c5-8edf-e3cae08a070b/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/tuantuan-server",
+  "appService.deploySubpath": "."
+}

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { DateTime } = require("luxon");
 
 const {
   trackParcel,
@@ -7,7 +8,6 @@ const {
   typeToModel,
   login,
 } = require("./static");
-const PackageModel = require("../models/packageModel");
 let mtoken = "1";
 
 const getSearchedPackage = (req, res) => {
@@ -43,7 +43,9 @@ const getSearchedPackage = (req, res) => {
         });
       });
 
-      const packageRecord = await PackageModel.findOne({ pk_id: pk_id });
+      const packageRecord = await typeToModel("package").findOne({
+        pk_id: pk_id,
+      });
 
       if (packageRecord === null && itemRecords.length === 0) {
         return res.status(400).json({
@@ -61,15 +63,17 @@ const getLatestPackages = (req, res) => {
   generalHandleWithoutTransaction(
     async () => {
       const { limit } = req.query;
-      const rawResult = await PackageModel.find()
+      const rawResult = await typeToModel("package")
+        .find()
         .sort("-createdAt")
         .limit(Number(limit));
       const result = rawResult.map((item) => {
         const { pk_id, type, receiver, sendTimeISO, ...rest } = item;
-        const sendLocaleDate = new Date(sendTimeISO)
-          .toLocaleDateString()
-          .slice(0, 5);
-        return { pk_id, type, receiver, sendLocaleDate };
+        const timeInISO = new Date(sendTimeISO).toISOString();
+        const sendDateInADL = DateTime.fromISO(timeInISO)
+          .setZone("Australia/Adelaide")
+          .toFormat("MM-dd");
+        return { pk_id, type, receiver, sendDateInADL };
       });
       res.status(200).json({ result });
     },

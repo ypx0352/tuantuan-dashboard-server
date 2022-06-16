@@ -9,6 +9,7 @@ const {
   writeLog,
   getSettingValues,
   login,
+  typeToModel,
 } = require("./static");
 
 const PackageModel = require("../models/packageModel");
@@ -33,7 +34,7 @@ const getOnePackage = async (pk_id) => {
     });
 
     // check if the response is correct
-    if (response.data.msg === "未登录") {
+    if (response.data.msg === "未登录!") {
       return "need to login";
     } else if (response.data.msg !== "success") {
       console.log("Post says:", response.data.msg);
@@ -87,7 +88,7 @@ const parseResponse = (data) => {
 
 const checkOrderExist = async (pk_id) => {
   try {
-    const result = await PackageModel.findOne({ pk_id: pk_id });
+    const result = await typeToModel('package').findOne({ pk_id: pk_id });
     if (result === null) {
       return false;
     }
@@ -216,7 +217,7 @@ const submitOrder = async (req, res) => {
       settingValues.babyFormulaPostage,
     ];
 
-    await PackageModel.create([Object.assign(packageData, receiverData)], {
+    await typeToModel('package').create([Object.assign(packageData, receiverData)], {
       session: session,
     });
 
