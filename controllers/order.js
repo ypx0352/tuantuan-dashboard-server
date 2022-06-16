@@ -88,7 +88,7 @@ const parseResponse = (data) => {
 
 const checkOrderExist = async (pk_id) => {
   try {
-    const result = await typeToModel('package').findOne({ pk_id: pk_id });
+    const result = await typeToModel("package").findOne({ pk_id: pk_id });
     if (result === null) {
       return false;
     }
@@ -119,7 +119,17 @@ const getOrder = async (req, res) => {
       for (let index = 0; index <= 3; index++) {
         switch (result) {
           case "false":
-            return res.status(500).json({ msg: "Bad request to post." });
+            // Try to login again when token expire
+            if (index !== 3) {
+              console.log("relogin...");
+              mtoken = await login();
+              result = await getOnePackage(pk_id);
+            } else {
+              return res
+                .status(500)
+                .json({ msg: "Can not login with post credentials" });
+            }
+            break;
 
           case "not found":
             return res
@@ -217,9 +227,12 @@ const submitOrder = async (req, res) => {
       settingValues.babyFormulaPostage,
     ];
 
-    await typeToModel('package').create([Object.assign(packageData, receiverData)], {
-      session: session,
-    });
+    await typeToModel("package").create(
+      [Object.assign(packageData, receiverData)],
+      {
+        session: session,
+      }
+    );
 
     // Write log.
     const logResult = await writeLog(
