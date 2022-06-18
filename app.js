@@ -45,6 +45,6 @@ app.use("/api/user", userRouter);
 
 app.use("/api/reset_password", resetPasswordRouter);
 
-app.listen(process.env.PORT || 443, () => {
+app.listen(process.env.PORT || process.env.EXPRESS_PORT, () => {
   console.log("Server is running.");
 });
