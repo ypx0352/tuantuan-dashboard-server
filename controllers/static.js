@@ -117,15 +117,6 @@ const parseParcelResponse = (data, returnContent) => {
   }
 };
 
-const test = async () => {
-  const result = await trackParcel("PE6584574AD", "sendTime");
-  console.log(result);
-
-  const china = DateTime.fromISO(result).setZone("asia/shanghai").toString();
-  console.log(china);
-};
-//test()
-
 const updateNote = async (req, res) => {
   const { newNote, type, _id } = req.body;
 
@@ -493,7 +484,14 @@ const generateInvoicePdf = (record) => {
     };
 
     const generateOverviewTableBody = (record) => [
-      ["Time (CST)", "Transaction ID", "User", "Qty", "Subtotal", "Payment method"],
+      [
+        "Time (CST)",
+        "Transaction ID",
+        "User",
+        "Qty",
+        "Subtotal",
+        "Payment method",
+      ],
       [
         DateTime.now().setZone("asia/shanghai").toFormat("yyyy-MM-dd HH:mm:ss"),
         record._id.toString(),
