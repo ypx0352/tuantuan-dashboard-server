@@ -483,9 +483,12 @@ const generateInvoicePdf = (record) => {
       return bodyList;
     };
 
+    const paidAtISO = new Date(record.createdAt).toISOString();
+
     const generateOverviewTableBody = (record) => [
       [
-        "Time (CST)",
+        "Paid at (CST)",
+        "Confirmed at (CST)",
         "Transaction ID",
         "User",
         "Qty",
@@ -493,7 +496,12 @@ const generateInvoicePdf = (record) => {
         "Payment method",
       ],
       [
-        DateTime.now().setZone("asia/shanghai").toFormat("yyyy-MM-dd HH:mm:ss"),
+        DateTime.fromISO(paidAtISO)
+          .setZone("Asia/Shanghai")
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        DateTime.local()
+          .setZone("Asia/Shanghai")
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
         record._id.toString(),
         record.username,
         record.qty,

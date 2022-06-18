@@ -11,6 +11,7 @@ const {
 } = require("./static");
 const path = require("path");
 const fs = require("fs");
+const { DateTime } = require("luxon");
 
 const addTransaction = (req, res) => {
   generalHandle(async (session) => {
@@ -118,7 +119,7 @@ const approveTransaction = (req, res) => {
   generalHandle(async (session) => {
     await typeToModel("transaction").findOneAndUpdate(
       { _id: transaction_id },
-      { $set: { approved: true } },
+      { $set: { approved: true, approvedAt: DateTime.local() } }, // approvedAt is the time with admin's time zone
       { session: session }
     );
 

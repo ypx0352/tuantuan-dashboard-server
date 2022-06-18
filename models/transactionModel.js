@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 
 const itemSchema = new mongoose.Schema(
   {
-    item: { type: String, required: true },
-    //original_id: { type: String, required: true },
+    item: { type: String, required: true },    
     cost: { type: Number, required: true }, //total cost
     qty: { type: Number, required: true },
     profits: { type: Number }, //total profits
@@ -30,6 +29,7 @@ const transactionSchema = new mongoose.Schema(
     },
     items: [itemSchema],
     approved: { type: Boolean, default: false },
+    approvedAt: { type: Date, default:undefined },
     payAmountToSender: { type: Number, required: true },
     qty: { type: Number, required: true },
     paymentMethod: { type: String, required: true },
