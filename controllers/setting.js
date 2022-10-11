@@ -8,7 +8,7 @@ const {
 const getSetting = (req, res) => {
   generalHandleWithoutTransaction(
     async () => {
-      const result = await typeToModel("setting").find();
+      const result = await typeToModel("setting").find();    
       return res.status(200).json({ result: result });
     },
     res,
