@@ -188,9 +188,7 @@ const submitOrder = async (req, res) => {
     for (const model of models) {
       const result = await model.findOne({ pk_id });
       if (result !== null) {
-        return res.status(400).json({
-          msg: "Failed! This package has already been saved! ",
-        });
+        throw new Error(`Failed! This package has already been saved!`);
       }
     }
 
@@ -221,10 +219,16 @@ const submitOrder = async (req, res) => {
       packageData.exchangeRate,
       packageData.normalPostage,
       packageData.babyFormulaPostage,
+      packageData.adultFormula3Postage,
+      packageData.adultFormula6Postage,
+      packageData.otherItemPostage,
     ] = [
       settingValues.exchangeRate,
       settingValues.normalPostage,
       settingValues.babyFormulaPostage,
+      settingValues.adultFormula3Postage,
+      settingValues.adultFormula6Postage,
+      settingValues.otherItemPostage,
     ];
 
     await typeToModel("package").create(

@@ -50,7 +50,7 @@ const generalHandle = async (action, res) => {
     console.log(error);
     await session.abortTransaction();
     res.status(500).json({
-      msg: "Failed. Server error!",
+      msg: `${error.message}`,
     });
   }
   session.endSession();
@@ -166,12 +166,26 @@ const getOrderModels = () => {
 
 const getSettingValues = async () => {
   try {
-    const [normalPostageResult, babyFormulaPostageResult, exchangeRateResult] =
-      await typeToModel("setting").find();
+    const settings = await typeToModel("setting").find();
     return {
-      normalPostage: normalPostageResult.value,
-      babyFormulaPostage: babyFormulaPostageResult.value,
-      exchangeRate: exchangeRateResult.value,
+      normalPostage: settings.find(
+        (setting) => setting.name === "normalPostage"
+      ).value,
+      babyFormulaPostage: settings.find(
+        (setting) => setting.name === "babyFormulaPostage"
+      ).value,
+      adultFormula3Postage: settings.find(
+        (setting) => setting.name === "adultFormula3Postage"
+      ).value,
+      adultFormula6Postage: settings.find(
+        (setting) => setting.name === "adultFormula6Postage"
+      ).value,
+      otherItemPostage: settings.find(
+        (setting) => setting.name === "otherItemPostage"
+      ).value,
+      exchangeRate: settings.find(
+        (setting) => setting.name === "exchangeRateInSetting"
+      ).value,
     };
   } catch (error) {
     throw error;
@@ -185,6 +199,9 @@ const getSettingValuesOfOnePackage = async (pk_id) => {
       exchangeRate: result.exchangeRate,
       normalPostage: result.normalPostage,
       babyFormulaPostage: result.babyFormulaPostage,
+      adultFormula3Postage: result.adultFormula3Postage,
+      adultFormula6Postage: result.adultFormula6Postage,
+      otherItemPostage: result.otherItemPostage,
     };
   } catch (error) {
     throw error;
@@ -193,7 +210,14 @@ const getSettingValuesOfOnePackage = async (pk_id) => {
 
 const calculatePostageInRMB = async (type, weightEach, qty, settingValues) => {
   try {
-    const { normalPostage, babyFormulaPostage, exchangeRate } = settingValues;
+    const {
+      normalPostage,
+      babyFormulaPostage,
+      adultFormula3Postage,
+      adultFormula6Postage,
+      otherItemPostage,
+      exchangeRate,
+    } = settingValues;
     if (type === "非奶粉") {
       return (
         floatMultiply100ToInt(
@@ -211,6 +235,38 @@ const calculatePostageInRMB = async (type, weightEach, qty, settingValues) => {
           (floatMultiply100ToInt(
             floatMultiply100ToInt(babyFormulaPostage) / 3
           ) *
+            floatMultiply100ToInt(exchangeRate) *
+            qty) /
+            1000000
+        ) / 100
+      );
+    } else if (type === "蓝胖子3") {
+      return (
+        floatMultiply100ToInt(
+          (floatMultiply100ToInt(
+            floatMultiply100ToInt(adultFormula3Postage) / 3
+          ) *
+            floatMultiply100ToInt(exchangeRate) *
+            qty) /
+            1000000
+        ) / 100
+      );
+    } else if (type === "蓝胖子6") {
+      return (
+        floatMultiply100ToInt(
+          (floatMultiply100ToInt(
+            floatMultiply100ToInt(adultFormula6Postage) / 6
+          ) *
+            floatMultiply100ToInt(exchangeRate) *
+            qty) /
+            1000000
+        ) / 100
+      );
+    } else if (type === "其他") {
+      return (
+        floatMultiply100ToInt(
+          (floatMultiply100ToInt(otherItemPostage) *
+            floatMultiply100ToInt(weightEach) *
             floatMultiply100ToInt(exchangeRate) *
             qty) /
             1000000
@@ -670,8 +726,8 @@ const sendEmail = async (emailAddress, subject, content, attachment) => {
 const generateEmailHtml = (
   title,
   content
-) => `<div style="padding: 20px; width: 100%; margin: 0 auto">
-      <div style="width: 600px; margin: 20px auto">
+) => `<div style="padding: 20px; width: 100%; margin: 0 auto; height:500px;">
+      <div style="width: 100%; margin: 20px auto 200px auto">
         <img
           src="https://github.com/ypx0352/ypx0352.github.io/blob/main/tuantuanDashboard-emailPic/dashboard-logo-removebg-preview.png?raw=true"
           style="
